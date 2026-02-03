@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hello</title>
+  <style>
+    :root{--bg:#0f1724;--accent:#06b6d4}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg),#071129);color:#e6eef6}
+    .container{background:rgba(255,255,255,0.03);padding:3rem 4rem;border-radius:16px;box-shadow:0 6px 30px rgba(2,6,23,0.6);text-align:center}
+    h1{font-size:clamp(2rem,6vw,4rem);margin:0 0 0.5rem;letter-spacing:-0.02em;color:#fff}
+    p{margin:0;color:#cbd5e1}
+    .small{font-size:0.9rem;margin-top:1rem;color:#94a3b8}
+    .wave{display:inline-block;animation:wave 1.6s infinite}
+    @keyframes wave{0%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-8deg)}40%{transform:rotate(14deg)}50%{transform:rotate(-4deg)}60%{transform:rotate(10deg)}100%{transform:rotate(0)}}
+  </style>
+</head>
+<body>
+  <div class="container" role="main" aria-label="Greeting">
+    <h1>Hello <span class="wave">👋</span></h1>
+    <p>Welcome to your new HTML page.</p>
+    <p class="small">Open <code>index.html</code> in a browser to view.</p>
+  </div>
+</body>
+</html>
