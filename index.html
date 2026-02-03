@@ -8,20 +8,20 @@
     :root{--bg:#0f1724;--accent:#06b6d4}
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
     body{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg),#071129);color:#e6eef6}
-    .container{background:rgba(255,255,255,0.03);padding:3rem 4rem;border-radius:16px;box-shadow:0 6px 30px rgba(2,6,23,0.6);text-align:center}
-    h1{font-size:clamp(2rem,6vw,4rem);margin:0 0 0.5rem;letter-spacing:-0.02em;color:#fff}
+    .container{background:rgba(255,255,255,0.03);padding:3rem 4rem;border-radius:16px;box-shadow:0 6px 30px rgba(2,6,23,0.6);text-align:center;max-width:95vw;box-sizing:border-box;}
+    h1,h2{font-size:clamp(2rem,6vw,4rem);margin:0 0 0.5rem;letter-spacing:-0.02em;color:#fff}
     p{margin:0;color:#cbd5e1}
     .small{font-size:0.9rem;margin-top:1rem;color:#94a3b8}
     .wave{display:inline-block;animation:wave 1.6s infinite}
     @keyframes wave{0%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-8deg)}40%{transform:rotate(14deg)}50%{transform:rotate(-4deg)}60%{transform:rotate(10deg)}100%{transform:rotate(0)}}
     input[type="number"] {
-      width: 220px;
+      width: 120px;
       padding: 0.5rem 0.75rem;
       border: 1.5px solid #334155;
       border-radius: 8px;
       background: #1e293b;
       color: #e6eef6;
-      font-size: 1rem;
+      font-size: 1.2rem;
       margin-top: 0.3rem;
       margin-bottom: 0.2rem;
       outline: none;
@@ -37,27 +37,78 @@
       font-weight: 500;
       color: #cbd5e1;
     }
+    .result-breakdown {
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+    .gst-price-box {
+      margin-top: 0.7rem;
+      display: inline-block;
+      padding: 0.5em 1.2em;
+      background: linear-gradient(90deg,#253639 60%,#12262f 100%);
+      color: #fff;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 10px;
+      box-shadow: 0 1px 6px #06b6d433;
+    }
+    .gst-price-box span {
+      font-size: 1.1em;
+    }
+    .form-row {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.2rem 0.5rem;
+        border-radius: 8px;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+      }
+      input[type="number"] {
+        width: 100%;
+        font-size: 1rem;
+      }
+      button[type="button"] {
+        width: 100%;
+        font-size: 1rem;
+        padding: 0.7rem 0;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container" role="main" aria-label="Gold Price Calculator">
     <h2>Gold Price Calculator <span class="wave">🌟</span></h2>
     <form id="goldForm" style="margin-bottom:2rem;">
-      <div style="margin-bottom:1rem;">
-        <label for="grams">Gold Weight (grams):</label><br>
-        <input type="number" id="grams" name="grams" step="0.001" min="0" required value="18.522">
+      <div class="form-row">
+        <div>
+          <label for="grams">Gold Weight (grams):</label><br>
+          <input type="number" id="grams" name="grams" step="0.001" min="0" required value="18.522">
+        </div>
+        <div>
+          <label for="rate">Gold Rate (per gram):</label><br>
+          <input type="number" id="rate" name="rate" step="1" min="0" required value="15315">
+        </div>
       </div>
-      <div style="margin-bottom:1rem;">
-        <label for="rate">Gold Rate (per gram):</label><br>
-        <input type="number" id="rate" name="rate" step="1" min="0" required value="15315">
-      </div>
-      <div style="margin-bottom:1rem;">
-        <label for="making">Making Charge (%):</label><br>
-        <input type="number" id="making" name="making" step="0.1" min="0" required value="8.90">
-      </div>
-      <div style="margin-bottom:1rem;">
-        <label for="makingDiscount">Making Discount (%):</label><br>
-        <input type="number" id="makingDiscount" name="makingDiscount" step="1" min="0" required value="10">
+      <div class="form-row">
+        <div>
+          <label for="making">Making Charge(%):</label><br>
+          <input type="number" id="making" name="making" step="0.1" min="0" required value="8.90">
+        </div>
+        <div>
+          <label for="makingDiscount">Making Discount(%):</label><br>
+          <input type="number" id="makingDiscount" name="makingDiscount" step="1" min="0" required value="10">
+        </div>
       </div>
       <div style="margin-bottom:1rem;">
         <label for="gst">GST (Tax):</label><br>
@@ -80,18 +131,25 @@
       }
       // Calculate base gold price
       const basePrice = grams * rate;
-      // Making charge
-      const makingCharge = basePrice * ((making - making * makingDiscount/100 ) / 100);
+      // Making charge before discount
+      const makingChargeWithoutDiscount = basePrice * (making / 100);
+      // Making discount value
+      const makingDiscountValue = basePrice * (making * makingDiscount / 10000);
+      // Making charge after discount
+      const makingChargeAdj = basePrice * ((making - making * makingDiscount/100 ) / 100);
       // gst adjustment (optional, 3%)
       const goldPrice = basePrice;
-      const makingChargeAdj = makingCharge;
       const finalPrice = goldPrice + makingChargeAdj;
       const gstInclPrice = finalPrice + (finalPrice * gst / 100);
       document.getElementById('result').innerHTML =
-        `<div style='margin-bottom:0.5rem;'>Total Gold Price: <b>₹${goldPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
-        `<div style='margin-bottom:0.5rem;'>Total Making Charge: <b>₹${makingChargeAdj.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
-        `<div style='margin-top:1rem;font-size:1.3em;'>Final Price: <b>₹${finalPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
-        `<div style='margin-top:1rem;font-size:1.3em;'>GST Inclusive Price: <b>₹${gstInclPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>`;
+        `<div class='result-breakdown'><span>Gold Price:</span> <b>₹${goldPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
+        `<div class='result-breakdown'><span>Making:</span> <b>₹${makingChargeWithoutDiscount.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
+        (makingDiscount > 0 ? `<div class='result-breakdown'><span>Making Discount:</span> <b>-₹${makingDiscountValue.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` : "") +
+        (makingDiscount > 0 ? `<div class='result-breakdown'><span>Making with discount:</span> <b>₹${makingChargeAdj.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` : "") +
+        `<div class='result-breakdown'><span>Total Price:</span> <b>₹${finalPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
+        `<div class='gst-price-box'>
+          Price(GST): <span>₹${gstInclPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</span>
+        </div>`;
     }
   </script>
 </body>
