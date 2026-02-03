@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Hello</title>
+  <title>Gold Price Calculator</title>
   <style>
     :root{--bg:#0f1724;--accent:#06b6d4}
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
@@ -14,13 +14,80 @@
     .small{font-size:0.9rem;margin-top:1rem;color:#94a3b8}
     .wave{display:inline-block;animation:wave 1.6s infinite}
     @keyframes wave{0%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-8deg)}40%{transform:rotate(14deg)}50%{transform:rotate(-4deg)}60%{transform:rotate(10deg)}100%{transform:rotate(0)}}
+    input[type="number"] {
+      width: 220px;
+      padding: 0.5rem 0.75rem;
+      border: 1.5px solid #334155;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #e6eef6;
+      font-size: 1rem;
+      margin-top: 0.3rem;
+      margin-bottom: 0.2rem;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px #06b6d455;
+      background: #273449;
+    }
+    label {
+      font-weight: 500;
+      color: #cbd5e1;
+    }
   </style>
 </head>
 <body>
-  <div class="container" role="main" aria-label="Greeting">
-    <h1>Hello <span class="wave">👋</span></h1>
-    <p>Welcome to your new HTML page.</p>
-    <p class="small">Open <code>index.html</code> in a browser to view.</p>
+  <div class="container" role="main" aria-label="Gold Price Calculator">
+    <h1>Gold Price Calculator <span class="wave">👋</span></h1>
+    <form id="goldForm" style="margin-bottom:2rem;">
+      <div style="margin-bottom:1rem;">
+        <label for="grams">Gold Weight (grams):</label><br>
+        <input type="number" id="grams" name="grams" step="0.001" min="0" required>
+      </div>
+      <div style="margin-bottom:1rem;">
+        <label for="rate">Gold Rate (per gram):</label><br>
+        <input type="number" id="rate" name="rate" step="0.01" min="0" required value="15315">
+      </div>
+      <div style="margin-bottom:1rem;">
+        <label for="making">Making Charge (%):</label><br>
+        <input type="number" id="making" name="making" step="0.01" min="0" required value="8.90">
+      </div>
+      
+      <div style="margin-bottom:1rem;">
+        <label for="purity">Purity (e.g. 22 for 22K):</label><br>
+        <input type="number" id="purity" name="purity" step="0.01" min="0" max="24" required value="22">
+      </div>
+      <button type="button" onclick="calculatePrice()" style="padding:0.5rem 2rem;font-size:1.1rem;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;">Calculate</button>
+    </form>
+    <div id="result" style="font-size:1.2rem;color:#06b6d4;"></div>
+    <p class="small">Enter the values and click Calculate to get the final price.</p>
   </div>
+  <script>
+    function calculatePrice() {
+      const grams = parseFloat(document.getElementById('grams').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const making = parseFloat(document.getElementById('making').value);
+      const purity = parseFloat(document.getElementById('purity').value);
+      if (isNaN(grams) || isNaN(rate) || isNaN(making) || isNaN(purity)) {
+        document.getElementById('result').textContent = 'Please enter all values.';
+        return;
+      }
+      // Calculate base gold price
+      const basePrice = grams * rate;
+      // Making charge
+      const makingCharge = basePrice * (making / 100);
+      // Purity adjustment (optional, for 22K gold)
+      const goldPrice = basePrice;
+      const makingChargeAdj = makingCharge;
+      const finalPrice = goldPrice + makingChargeAdj;
+      document.getElementById('result').innerHTML =
+        `<div style='margin-bottom:0.5rem;'>Total Gold Price: <b>₹${goldPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
+        `<div style='margin-bottom:0.5rem;'>Total Making Charge: <b>₹${makingChargeAdj.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
+        `<div style='margin-top:1rem;font-size:1.3em;'>Final Price: <b>₹${finalPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>`;
+    }
+  </script>
 </body>
 </html>
