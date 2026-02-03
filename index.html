@@ -41,52 +41,57 @@
 </head>
 <body>
   <div class="container" role="main" aria-label="Gold Price Calculator">
-    <h1>Gold Price Calculator <span class="wave">👋</span></h1>
+    <h2>Gold Price Calculator <span class="wave">🌟</span></h2>
     <form id="goldForm" style="margin-bottom:2rem;">
       <div style="margin-bottom:1rem;">
         <label for="grams">Gold Weight (grams):</label><br>
-        <input type="number" id="grams" name="grams" step="0.001" min="0" required>
+        <input type="number" id="grams" name="grams" step="0.001" min="0" required value="18.522">
       </div>
       <div style="margin-bottom:1rem;">
         <label for="rate">Gold Rate (per gram):</label><br>
-        <input type="number" id="rate" name="rate" step="0.01" min="0" required value="15315">
+        <input type="number" id="rate" name="rate" step="1" min="0" required value="15315">
       </div>
       <div style="margin-bottom:1rem;">
         <label for="making">Making Charge (%):</label><br>
-        <input type="number" id="making" name="making" step="0.01" min="0" required value="8.90">
+        <input type="number" id="making" name="making" step="0.1" min="0" required value="8.90">
       </div>
-      
       <div style="margin-bottom:1rem;">
-        <label for="purity">Purity (e.g. 22 for 22K):</label><br>
-        <input type="number" id="purity" name="purity" step="0.01" min="0" max="24" required value="22">
+        <label for="makingDiscount">Making Discount (%):</label><br>
+        <input type="number" id="makingDiscount" name="makingDiscount" step="1" min="0" required value="10">
+      </div>
+      <div style="margin-bottom:1rem;">
+        <label for="gst">GST (Tax):</label><br>
+        <input type="number" id="gst" name="gst" step="0.1" min="0" max="24" required value="3">
       </div>
       <button type="button" onclick="calculatePrice()" style="padding:0.5rem 2rem;font-size:1.1rem;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;">Calculate</button>
     </form>
     <div id="result" style="font-size:1.2rem;color:#06b6d4;"></div>
-    <p class="small">Enter the values and click Calculate to get the final price.</p>
   </div>
   <script>
     function calculatePrice() {
       const grams = parseFloat(document.getElementById('grams').value);
       const rate = parseFloat(document.getElementById('rate').value);
       const making = parseFloat(document.getElementById('making').value);
-      const purity = parseFloat(document.getElementById('purity').value);
-      if (isNaN(grams) || isNaN(rate) || isNaN(making) || isNaN(purity)) {
+      const makingDiscount = parseFloat(document.getElementById('makingDiscount').value);
+      const gst = parseFloat(document.getElementById('gst').value);
+      if (isNaN(grams) || isNaN(rate) || isNaN(making) || isNaN(gst)) {
         document.getElementById('result').textContent = 'Please enter all values.';
         return;
       }
       // Calculate base gold price
       const basePrice = grams * rate;
       // Making charge
-      const makingCharge = basePrice * (making / 100);
-      // Purity adjustment (optional, for 22K gold)
+      const makingCharge = basePrice * ((making - making * makingDiscount/100 ) / 100);
+      // gst adjustment (optional, 3%)
       const goldPrice = basePrice;
       const makingChargeAdj = makingCharge;
       const finalPrice = goldPrice + makingChargeAdj;
+      const gstInclPrice = finalPrice + (finalPrice * gst / 100);
       document.getElementById('result').innerHTML =
         `<div style='margin-bottom:0.5rem;'>Total Gold Price: <b>₹${goldPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
         `<div style='margin-bottom:0.5rem;'>Total Making Charge: <b>₹${makingChargeAdj.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
-        `<div style='margin-top:1rem;font-size:1.3em;'>Final Price: <b>₹${finalPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>`;
+        `<div style='margin-top:1rem;font-size:1.3em;'>Final Price: <b>₹${finalPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
+        `<div style='margin-top:1rem;font-size:1.3em;'>GST Inclusive Price: <b>₹${gstInclPrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>`;
     }
   </script>
 </body>
