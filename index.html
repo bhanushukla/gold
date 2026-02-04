@@ -70,6 +70,7 @@
     .final-value-row { display: none; }
     .reverse-mode .final-value-row { display: block; }
     .reverse-mode .making-row { display: none; }
+    .reverse-mode .toggle-making-btn { display: none; }
     .calc-btn {
       padding: 0.5rem 2rem;
       font-size: 1.1rem;
@@ -100,6 +101,29 @@
       box-shadow: 0 2px 8px #06b6d455;
       cursor: pointer;
       font-size: 2em;
+    }
+    .custom-making-row {
+      display: none;
+      margin-bottom: 1rem;
+    }
+    .custom-making-row.show {
+      display: block;
+    }
+    .toggle-making-btn {
+      padding: 0.3rem 0.5rem !important;
+      width: 60% !important;
+      font-size: 0.9rem;
+      background: rgba(6, 182, 212, 0.2);
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: background 0.2s;
+    }
+    .toggle-making-btn:hover {
+      background: rgba(6, 182, 212, 0.3);
     }
     @media (max-width: 600px) {
       .container {
@@ -154,8 +178,15 @@
         </div>
       </div>
       <div class="form-row-bottom">
-        <label for="gst">GST (Tax):</label><br>
-        <input type="number" id="gst" name="gst" step="0.1" min="0" max="24" required value="3">
+        <div>
+          <label for="gst">GST (%):</label><br>
+          <input type="number" id="gst" name="gst" step="0.1" min="0" max="24" required value="3">
+        </div>
+        <button type="button" class="toggle-making-btn" id="toggleMakingBtn">Update Making</button>
+        <div class="custom-making-row" id="customMakingRow">
+          <label for="makingRate">Making Gold Rate (per gram):</label><br>
+          <input type="number" id="makingRate" name="makingRate" step="1" min="0" value="">
+        </div>
       </div>
       <button type="button" class="calc-btn" id="calcBtn" onclick="calculatePrice()">Calculate</button>
     </form>
@@ -171,10 +202,22 @@
       document.getElementById('calcBtn').textContent = reverseMode ? 'Calculate Making %' : 'Calculate';
       document.getElementById('result').innerHTML = '';
     };
+    document.getElementById('toggleMakingBtn').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('customMakingRow').classList.toggle('show');
+      const isCustomMakingVisible = document.getElementById('customMakingRow').classList.contains('show');
+      if (!isCustomMakingVisible) {
+        document.getElementById('makingRate').value = '';
+      }
+      this.textContent = isCustomMakingVisible ? 'Hide Custom Making' : 'Update Making';
+    };
     function calculatePrice() {
       const grams = parseFloat(document.getElementById('grams').value);
       const rate = parseFloat(document.getElementById('rate').value);
       const gst = parseFloat(document.getElementById('gst').value);
+      const makingRateInput = document.getElementById('makingRate').value.trim();
+      const usesCustomMakingRate = makingRateInput !== '';
+      
       if (!reverseMode) {
         const making = parseFloat(document.getElementById('making').value);
         const makingDiscount = parseFloat(document.getElementById('makingDiscount').value);
@@ -183,9 +226,24 @@
           return;
         }
         const basePrice = grams * rate;
-        const makingChargeWithoutDiscount = basePrice * (making / 100);
-        const makingDiscountValue = basePrice * (making * makingDiscount / 10000);
-        const makingChargeAdj = basePrice * ((making - making * makingDiscount/100 ) / 100);
+        
+        let makingChargeWithoutDiscount, makingDiscountValue, makingChargeAdj;
+        
+        if (usesCustomMakingRate) {
+          const makingRate = parseFloat(makingRateInput);
+          if (isNaN(makingRate)) {
+            document.getElementById('result').textContent = 'Please enter a valid making gold rate.';
+            return;
+          }
+          makingChargeWithoutDiscount = grams * makingRate * making / 100;
+          makingDiscountValue = makingChargeWithoutDiscount * (makingDiscount / 100);
+          makingChargeAdj = makingChargeWithoutDiscount * (1 - makingDiscount / 100);
+        } else {
+          makingChargeWithoutDiscount = basePrice * (making / 100);
+          makingDiscountValue = basePrice * (making * makingDiscount / 10000);
+          makingChargeAdj = basePrice * ((making - making * makingDiscount/100 ) / 100);
+        }
+        
         const goldPrice = basePrice;
         const finalPrice = goldPrice + makingChargeAdj;
         const gstInclPrice = finalPrice + (finalPrice * gst / 100);
@@ -209,7 +267,7 @@
         const makingPercent = ((priceWithoutGST - basePrice) / basePrice) * 100;
         document.getElementById('result').innerHTML =
           `<div class='result-breakdown'><span>Gold Price:</span> <b>₹${basePrice.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
-          `<div class='result-breakdown'><span>Entered Price (GST incl):</span> <b>${finalValue.toLocaleString(undefined, {maximumFractionDigits:2})}%</b></div>` +
+          `<div class='result-breakdown'><span>Entered Price (GST incl):</span> <b>₹${finalValue.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
           `<div class='result-breakdown'><span>Making Charge:</span> <b>₹${(basePrice * makingPercent / 100).toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
           `<div class='result-breakdown'><span>Total Price (no GST):</span> <b>₹${priceWithoutGST.toLocaleString(undefined, {maximumFractionDigits:2})}</b></div>` +
           `<div class='gst-price-box'>
